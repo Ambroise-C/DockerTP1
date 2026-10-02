@@ -1,0 +1,24 @@
+# IDE / editors
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+.env.*
+
+# Java / Maven build output
+**/target/
+**/build/
+out/
+
+# Docker local artifacts
+*.log
+
+# Generic temporary files
+*.tmp
+*.bak
