@@ -1,10 +1,10 @@
 name: CI devops 2025
 on:
-  # Run CI when code is pushed to either development branch.
+  # Run CI when code is pushed to main branch.
   push:
     branches:
       - main
-  # Validate proposed changes before they are merged into either branch.
+  # Validate proposed changes before they are merged.
   pull_request:
 
 jobs:
@@ -28,6 +28,16 @@ jobs:
       - name: Build and test backend
         working-directory: backend/simpleapi
         run: bash ./mvnw --batch-mode --no-transfer-progress verify
+
+      # Analyse de la qualité du code avec SonarCloud
+      - name: SonarCloud Scan
+        run: >
+          bash ./backend/simpleapi/mvnw -B verify sonar:sonar
+          -Dsonar.projectKey=ambroise-couturier_je-sais-pas-quoi-faire-txt
+          -Dsonar.organization=ambroise-couturier
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          --file ./backend/simpleapi/pom.xml
 
   build-and-push-docker-image:
       needs: test-backend
