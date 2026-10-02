@@ -31,13 +31,7 @@ jobs:
 
       # Analyse de la qualité du code avec SonarCloud
       - name: SonarCloud Scan
-        run: >
-          bash ./backend/simpleapi/mvnw -B verify sonar:sonar
-          -Dsonar.projectKey=ambroise-couturier_je-sais-pas-quoi-faire-txt
-          -Dsonar.organization=ambroise-couturier
-          -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-          --file ./backend/simpleapi/pom.xml
+        run: bash ./backend/simpleapi/mvnw -B verify sonar:sonar -Dsonar.projectKey=ambroise-couturier_je-sais-pas-quoi-faire-txt -Dsonar.organization=ambroise-couturier -Dsonar.host.url=https://sonarcloud.io -Dsonar.token=${{ secrets.SONAR_TOKEN }} --file ./backend/simpleapi/pom.xml
 
   build-and-push-docker-image:
       needs: test-backend
