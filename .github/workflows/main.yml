@@ -43,23 +43,26 @@ build-and-push-docker-image:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 1. Backend
       - name: Build image and push backend
         uses: docker/build-push-action@v6
         with:
           context: ./backend/simpleapi
-          push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-backend:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
 
+      # 2. Database
       - name: Build image and push database
         uses: docker/build-push-action@v6
         with:
           context: ./database
-          push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-database:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
 
+      # 3. HTTPD (Frontend / Reverse Proxy)
       - name: Build image and push httpd
         uses: docker/build-push-action@v6
         with:
           context: ./httpd
-          push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-httpd:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
