@@ -29,40 +29,40 @@ jobs:
         working-directory: backend/simpleapi
         run: bash ./mvnw --batch-mode --no-transfer-progress verify
 
-build-and-push-docker-image:
-    needs: test-backend
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  build-and-push-docker-image:
+      needs: test-backend
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      runs-on: ubuntu-24.04
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        - name: Log in to Docker Hub
+          uses: docker/login-action@v3
+          with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 1. Backend
-      - name: Build image and push backend
-        uses: docker/build-push-action@v6
-        with:
-          context: ./backend/simpleapi
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-backend:latest
-          push: ${{ github.ref == 'refs/heads/main' }}
+        # 1. Backend
+        - name: Build image and push backend
+          uses: docker/build-push-action@v6
+          with:
+            context: ./backend/simpleapi
+            tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-backend:latest
+            push: ${{ github.ref == 'refs/heads/main' }}
 
-      # 2. Database
-      - name: Build image and push database
-        uses: docker/build-push-action@v6
-        with:
-          context: ./database
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-database:latest
-          push: ${{ github.ref == 'refs/heads/main' }}
+        # 2. Database
+        - name: Build image and push database
+          uses: docker/build-push-action@v6
+          with:
+            context: ./database
+            tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-database:latest
+            push: ${{ github.ref == 'refs/heads/main' }}
 
-      # 3. HTTPD (Frontend / Reverse Proxy)
-      - name: Build image and push httpd
-        uses: docker/build-push-action@v6
-        with:
-          context: ./httpd
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-httpd:latest
-          push: ${{ github.ref == 'refs/heads/main' }}
+        # 3. HTTPD (Frontend / Reverse Proxy)
+        - name: Build image and push httpd
+          uses: docker/build-push-action@v6
+          with:
+            context: ./httpd
+            tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-httpd:latest
+            push: ${{ github.ref == 'refs/heads/main' }}
