@@ -50,6 +50,7 @@ jobs:
       - name: Install Frontend Dependencies & Build
         working-directory: ./front
         run: |
+          yarn config set strict-ssl false
           yarn install   
           yarn build     
 
