@@ -1,6 +1,7 @@
 # IDE / editors
 .vscode/
 .idea/
+clef/
 *.iml
 
 # OS files
