@@ -45,10 +45,11 @@ services:
     image: couturierambroise/my-httpd:1.0
     build: ./Server
     restart: unless-stopped
-    environment:
-      - BACKEND_URL=${BACKEND_URL}
     ports:
       - "80:80"
+    volumes:
+      - ./front/dist:/usr/local/apache2/htdocs:ro
+      - ./Server/conf/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
     networks:
       - app-network
     depends_on:
@@ -63,9 +64,13 @@ services:
 
 networks:
   app-network:
-    driver: bridge
+    name: app-network
+    external: true
   db-network:
-    driver: bridge
+    name: db-network
+    external: true
 
 volumes:
   db-data:
+    name: db-data
+    external: true
