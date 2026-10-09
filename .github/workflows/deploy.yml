@@ -5,9 +5,6 @@ on:
     workflows: ["main.yml"] # Replace with the exact name of your build workflow if applicable
     types:
       - completed
-  push:
-    branches:
-      - main
 
 jobs:
   deploy:
