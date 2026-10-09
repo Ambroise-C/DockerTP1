@@ -1,0 +1,41 @@
+---
+# 1. Nettoyer tout dossier parasite créé par erreur sur la cible
+- name: S'assurer que le chemin httpd.conf n'est pas un dossier
+  ansible.builtin.file:
+    path: /etc/httpd_proxy/httpd.conf
+    state: absent
+
+# 2. Créer le dossier d'accueil sur le serveur distant
+- name: Créer le dossier de configuration proxy sur le serveur
+  ansible.builtin.file:
+    path: /etc/httpd_proxy
+    state: directory
+    mode: '0755'
+
+# 3. Copier le fichier httpd.conf depuis Ansible vers le serveur distant
+- name: Copier le fichier de configuration httpd.conf
+  ansible.builtin.copy:
+    src: httpd.conf
+    dest: /etc/httpd_proxy/httpd.conf
+    mode: '0644'
+
+# 4. Lancer le conteneur en montant le fichier distant
+- name: HTTPD Proxy Launch
+  community.docker.docker_container:
+    name: httpd
+    image: couturierambroise/my-httpd:1.0
+    restart_policy: unless-stopped
+    recreate: true
+    networks:
+      - name: app-network
+    published_ports:
+      - "80:80"
+    volumes:
+      - "/etc/httpd_proxy/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    state: started

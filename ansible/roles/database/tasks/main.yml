@@ -1,0 +1,20 @@
+- name: Start database
+  community.docker.docker_container:
+    name: database
+    image: couturierambroise/my-database:1.0
+    restart_policy: unless-stopped
+    networks:
+      - name: db-network
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    env:
+      POSTGRES_DB: "{{ postgres_db }}"
+      POSTGRES_USER: "{{ postgres_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ postgres_user }} -d {{ postgres_db }}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    state: started

@@ -1,0 +1,14 @@
+- name: Create app-network network
+  community.docker.docker_network:
+    name: app-network
+    state: present
+
+- name: Create db-network network
+  community.docker.docker_network:
+    name: db-network
+    state: present
+
+- name: Create persistant volume for the db
+  community.docker.docker_volume:
+    name: db-data
+    state: present
