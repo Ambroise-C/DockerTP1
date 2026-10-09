@@ -40,22 +40,6 @@ jobs:
         run: |
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x' 
-          cache: 'yarn' 
-          cache-dependency-path: front/yarn.lock
-
-      - name: Install Frontend Dependencies & Build
-        working-directory: ./front
-        run: |
-          yarn config set strict-ssl false
-          yarn install   
-          yarn build   
-        env:
-          NODE_OPTIONS: --openssl-legacy-provider  
-
       - name: Run Ansible Playbook
         run: |
           ansible-playbook -i ansible/inventories/setup.yml ansible/site.yml \
