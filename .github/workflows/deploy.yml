@@ -52,7 +52,9 @@ jobs:
         run: |
           yarn config set strict-ssl false
           yarn install   
-          yarn build     
+          yarn build   
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider  
 
       - name: Run Ansible Playbook
         run: |
