@@ -45,12 +45,13 @@ jobs:
         with:
           node-version: '16' 
           cache: 'yarn' 
+          cache-dependency-path: front/yarn.lock
 
       - name: Install Frontend Dependencies & Build
+        working-directory: ./front
         run: |
-          cd front
-          yarn install   # ou npm install
-          yarn build     # ou npm run build
+          yarn install   
+          yarn build     
 
       - name: Run Ansible Playbook
         run: |
