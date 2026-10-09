@@ -22,7 +22,7 @@
 # 4. Lancer le conteneur en montant le fichier distant
 - name: HTTPD Proxy Launch
   community.docker.docker_container:
-    name: httpd
+    name: dockertp-httpd-1
     image: couturierambroise/my-httpd:1.0
     restart_policy: unless-stopped
     recreate: true
