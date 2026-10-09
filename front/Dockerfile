@@ -1,18 +1,13 @@
-FROM node:12.16.3-stretch-slim AS build
+# --- Build du Front ---
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY package.json yarn.lock ./
+RUN yarn config set strict-ssl false && yarn install
+COPY . .
+RUN NODE_OPTIONS=--openssl-legacy-provider yarn build
 
-WORKDIR /opt/front
-
-COPY src/ src/
-COPY public/ public/
-COPY package.json .
-COPY yarn.lock .
-COPY default.conf .
-COPY .env.production .
-
-RUN npm install
-RUN npm run build
-
-FROM nginx:1.15.7-alpine
-
-COPY --from=build /opt/front/dist /usr/share/nginx/html/
-COPY --from=build /opt/front/default.conf /etc/nginx/conf.d/default.conf
+# --- Serveur Nginx pour le Front ---
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY default.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80

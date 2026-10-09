@@ -55,7 +55,6 @@ jobs:
             file: ./backend/Dockerfile
             tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-backend:latest
             push: ${{ github.ref == 'refs/heads/main' }}
-
         # 2. Database
         - name: Build image and push database
           uses: docker/build-push-action@v6
