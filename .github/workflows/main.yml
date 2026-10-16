@@ -1,4 +1,5 @@
 name: CI devops 2025
+
 on:
   # Run CI when code is pushed to main branch.
   push:
@@ -14,6 +15,8 @@ jobs:
     steps:
       # Check out the repository so the wrapper and backend sources are available.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # ⚠️ INDISPENSABLE pour SonarCloud (historique Git complet)
 
       - name: Set up JDK 21
         # Use the Java version required by the Spring Boot backend and cache Maven dependencies.
@@ -23,52 +26,54 @@ jobs:
           java-version: '21'
           cache: maven
 
-      # verify runs unit tests and the Failsafe integration tests configured in the POM.
-      # Call the wrapper through Bash because it is not marked executable in Git.
-      - name: Build and test backend
+      # verify runs unit tests and the Failsafe integration tests configured in the POM, puis envoie à SonarCloud
+      - name: Build, test and analyze with SonarCloud
         working-directory: backend/simpleapi
-        run: bash ./mvnw --batch-mode --no-transfer-progress verify
-
-      # Analyse de la qualité du code avec SonarCloud
-      - name: SonarCloud Scan
-        run: bash ./backend/simpleapi/mvnw -B verify sonar:sonar -Dsonar.projectKey=ambroise-couturier_je-sais-pas-quoi-faire-txt -Dsonar.organization=ambroise-couturier -Dsonar.host.url=https://sonarcloud.io -Dsonar.token=${{ secrets.SONAR_TOKEN }} --file ./backend/simpleapi/pom.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          bash ./mvnw --batch-mode --no-transfer-progress verify sonar:sonar \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }
 
   build-and-push-docker-image:
-      needs: test-backend
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      runs-on: ubuntu-24.04
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    needs: test-backend
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Log in to Docker Hub
-          uses: docker/login-action@v3
-          with:
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-        # 1. Backend
-        - name: Build image and push backend
-          uses: docker/build-push-action@v6
-          with:
-            context: ./backend
-            file: ./backend/Dockerfile
-            tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-backend:latest
-            push: ${{ github.ref == 'refs/heads/main' }}
-        # 2. Database
-        - name: Build image and push database
-          uses: docker/build-push-action@v6
-          with:
-            context: ./database
-            file: ./database/Dockerfile
-            tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-database:latest
-            push: ${{ github.ref == 'refs/heads/main' }}
+      # 1. Backend
+      - name: Build image and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-backend:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
 
-        # 3. HTTPD (Frontend / Reverse Proxy)
-        - name: Build image and push httpd
-          uses: docker/build-push-action@v6
-          with:
-            context: ./Server
-            file: ./Server/Dockerfile
-            tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-httpd:latest
-            push: ${{ github.ref == 'refs/heads/main' }}
+      # 2. Database
+      - name: Build image and push database
+        uses: docker/build-push-action@v6
+        with:
+          context: ./database
+          file: ./database/Dockerfile
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-database:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
+
+      # 3. HTTPD (Frontend / Reverse Proxy)
+      - name: Build image and push httpd
+        uses: docker/build-push-action@v6
+        with:
+          context: ./Server
+          file: ./Server/Dockerfile
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-httpd:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
