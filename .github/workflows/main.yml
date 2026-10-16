@@ -35,7 +35,7 @@ jobs:
         run: |
           bash ./mvnw --batch-mode --no-transfer-progress verify sonar:sonar \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
   build-and-push-docker-image:
     needs: test-backend
